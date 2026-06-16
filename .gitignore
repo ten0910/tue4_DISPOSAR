@@ -73,3 +73,6 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+Assets/TextMesh Pro/IoEI SDF.asset
+Assets/TextMesh Pro/MochiyPopOne-OTF-ExtraBold SDF.asset
+Assets/TextMesh Pro/Sniglet Regular SDF.asset
