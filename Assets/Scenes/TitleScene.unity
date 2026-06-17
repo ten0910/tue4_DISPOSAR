@@ -1073,7 +1073,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0aadcda3251fc1a4090c318f1c40ebbc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FadeTrigger
-  targetSceneName: 
+  targetSceneName: GameScene
   fadeDuration: 1
   fadeColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!114 &585827382
