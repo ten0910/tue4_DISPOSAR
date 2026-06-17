@@ -3,40 +3,57 @@ using System.Collections;
 
 public class TrashProjectile : MonoBehaviour
 {
-    public int trashType; // 0:可燃, 1:プラ, 2:缶・ペットボトル
-    public float flyDuration = 0.8f; // 飛ぶ時間
-    public float arcHeight = 2.0f;    // 放物線の高さ
+    [HideInInspector] public TrashData data; // データベースから渡される情報
+    public float flyDuration = 0.8f; 
+    public float arcHeight = 2.0f;    
 
     private bool isFlying = false;
-
-    // 軽量化：参照を記憶する変数
     private GameManager gameManager;
     private TrashSpawner trashSpawner;
 
     void Start()
     {
-        // ごみが生成された瞬間に、シーン内から1回だけ検索して記憶しておく（新形式 API）
         gameManager = Object.FindFirstObjectByType<GameManager>();
         trashSpawner = Object.FindFirstObjectByType<TrashSpawner>();
     }
 
     void Update()
     {
-        if (isFlying) return;
+        // 飛行中、またはゲーム中でない場合は入力を無視
+        if (isFlying || gameManager == null || gameManager.currentState != GameManager.GameState.Playing) return;
 
-        // レイキャストでクリックしたごみ箱を検知
+        // --- プロトタイプ用：キーボード操作でごみ箱を指定 ---
+        if (Input.GetKeyDown(KeyCode.Q)) TryFlyToBin(0); // 可燃
+        if (Input.GetKeyDown(KeyCode.W)) TryFlyToBin(1); // プラ
+        if (Input.GetKeyDown(KeyCode.E)) TryFlyToBin(2); // 缶・ペットボトル
+
+        /* Arduino/圧力センサーがある場合の処理 (将来用)
+        int binIndex = ArduinoManager.Instance.GetPressureSensorIndex();
+        if (binIndex != -1) TryFlyToBin(binIndex);
+        */
+
+        // マウス操作（デバッグ用）
         if (Input.GetMouseButtonDown(0))
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-
-            if (Physics.Raycast(ray, out hit))
+            if (Physics.Raycast(ray, out RaycastHit hit))
             {
                 TrashBin bin = hit.collider.GetComponent<TrashBin>();
-                if (bin != null)
-                {
-                    StartCoroutine(FlyToBin(bin));
-                }
+                if (bin != null) StartCoroutine(FlyToBin(bin));
+            }
+        }
+    }
+
+    void TryFlyToBin(int binType)
+    {
+        // シーン内のごみ箱から、指定されたタイプのものを見つけて飛ばす
+        TrashBin[] bins = Object.FindObjectsByType<TrashBin>(FindObjectsSortMode.None);
+        foreach (var bin in bins)
+        {
+            if (bin.targetBinType == binType)
+            {
+                StartCoroutine(FlyToBin(bin));
+                break;
             }
         }
     }
@@ -47,8 +64,9 @@ public class TrashProjectile : MonoBehaviour
         Vector3 startPos = transform.position;
         Vector3 endPos = bin.transform.position;
 
-        // 飛んだ時点で正誤判定を行う（あらかじめ記憶した変数を使用）
-        bool isCorrect = (this.trashType == bin.targetBinType);
+        // 判定（DatabaseのtargetBinTypeと、入れた箱のタイプを比較）
+        bool isCorrect = (data.targetBinType == bin.targetBinType);
+        
         if (gameManager != null)
         {
             gameManager.OnSortResult(isCorrect);
@@ -60,23 +78,19 @@ public class TrashProjectile : MonoBehaviour
         {
             elapsed += Time.deltaTime;
             float percent = elapsed / flyDuration;
-
-            // XZ軸の直線補間
             Vector3 currentPos = Vector3.Lerp(startPos, endPos, percent);
-            // Y軸に数式（放物線）を上乗せ
             currentPos.y += Mathf.Sin(percent * Mathf.PI) * arcHeight;
-
             transform.position = currentPos;
             yield return null;
         }
 
-        // ごみ箱に到達した瞬間の演出
+        // 到着時の演出
         bin.PlayEffect(isCorrect);
 
-        // 次のごみをスポーンさせて自身を消去（あらかじめ記憶した変数を使用）
+        // 解説を表示（Spawner側のUI制御を呼ぶ）
         if (trashSpawner != null)
         {
-            trashSpawner.SpawnNextTrash();
+            trashSpawner.ShowExplanation(isCorrect);
         }
 
         Destroy(gameObject);

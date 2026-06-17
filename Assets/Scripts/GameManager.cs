@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using TMPro; // TextMeshProを使用
 
 public class GameManager : MonoBehaviour
 {
@@ -10,13 +11,14 @@ public class GameManager : MonoBehaviour
 
     [Header("UI Elements")]
     public GameObject tutorialUI;
-    public Text countdownText;
-    public Text timerText;
-    public Text comboText;
+    public TextMeshProUGUI countdownText;
+    public TextMeshProUGUI timerText;
+    public TextMeshProUGUI comboText;
     public GameObject timeUpUI;
+    public GameObject startPopSprite; // 0.6秒ポップするスプライト
 
     [Header("Settings")]
-    public float gameDuration = 180f; // 3分
+    public float gameDuration = 300f; // 5分
     private float timeRemaining;
     private int currentCombo = 0;
 
@@ -27,10 +29,10 @@ public class GameManager : MonoBehaviour
         GameData.Reset();
         spawner = FindFirstObjectByType<TrashSpawner>();
 
-
         tutorialUI.SetActive(true);
-        countdownText.gameObject.SetActive(false);
+        if (countdownText != null) countdownText.gameObject.SetActive(false);
         timeUpUI.SetActive(false);
+        if (startPopSprite) startPopSprite.SetActive(false);
         UpdateComboUI();
     }
 
@@ -61,18 +63,24 @@ public class GameManager : MonoBehaviour
     IEnumerator StartCountdown()
     {
         currentState = GameState.Countdown;
-        countdownText.gameObject.SetActive(true);
+        if (countdownText != null) countdownText.gameObject.SetActive(true);
 
-        for (int i = 3; i > 0; i--)
+        // 10秒カウントダウン
+        for (int i = 10; i > 0; i--)
         {
-            countdownText.text = i.ToString();
+            if (countdownText != null) countdownText.text = i.ToString();
             yield return new WaitForSeconds(1f);
         }
 
-        countdownText.text = "START!";
-        spawner.SpawnNextTrash(); // 最初のごみを生成
-        yield return new WaitForSeconds(1f);
-        countdownText.gameObject.SetActive(false);
+        if (countdownText != null) countdownText.text = "START!";
+        
+        // スタート時のポップ演出 (0.6秒)
+        if (startPopSprite) startPopSprite.SetActive(true);
+        yield return new WaitForSeconds(0.6f);
+        if (startPopSprite) startPopSprite.SetActive(false);
+
+        yield return new WaitForSeconds(0.4f); // 合計1秒程度待機
+        if (countdownText != null) countdownText.gameObject.SetActive(false);
 
         timeRemaining = gameDuration;
         currentState = GameState.Playing;
@@ -100,6 +108,7 @@ public class GameManager : MonoBehaviour
 
     void UpdateTimerUI()
     {
+        if (timerText == null) return;
         int minutes = Mathf.FloorToInt(timeRemaining / 60f);
         int seconds = Mathf.FloorToInt(timeRemaining % 60f);
         timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
@@ -107,6 +116,7 @@ public class GameManager : MonoBehaviour
 
     void UpdateComboUI()
     {
+        if (comboText == null) return;
         comboText.text = currentCombo > 0 ? $"{currentCombo} Combo!" : "";
     }
 
