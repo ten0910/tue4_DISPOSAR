@@ -13,14 +13,12 @@ public class GameManager : MonoBehaviour
     public GameObject tutorialUI;
     public TextMeshProUGUI countdownText;
     public TextMeshProUGUI timerText;
-    public TextMeshProUGUI comboText;
     public GameObject timeUpUI;
     public GameObject startPopSprite; // 0.6秒ポップするスプライト
 
     [Header("Settings")]
     public float gameDuration = 300f; // 5分
     private float timeRemaining;
-    private int currentCombo = 0;
 
     private TrashSpawner spawner;
 
@@ -33,7 +31,6 @@ public class GameManager : MonoBehaviour
         if (countdownText != null) countdownText.gameObject.SetActive(false);
         timeUpUI.SetActive(false);
         if (startPopSprite) startPopSprite.SetActive(false);
-        UpdateComboUI();
     }
 
     void Update()
@@ -92,18 +89,7 @@ public class GameManager : MonoBehaviour
         if (isCorrect)
         {
             GameData.CorrectCount++;
-            currentCombo++;
-            if (currentCombo > GameData.MaxCombo)
-            {
-                GameData.MaxCombo = currentCombo;
-            }
         }
-        else
-        {
-            if (currentCombo > GameData.MaxCombo) GameData.MaxCombo = currentCombo;
-            currentCombo = 0;
-        }
-        UpdateComboUI();
     }
 
     void UpdateTimerUI()
@@ -114,17 +100,12 @@ public class GameManager : MonoBehaviour
         timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
     }
 
-    void UpdateComboUI()
-    {
-        if (comboText == null) return;
-        comboText.text = currentCombo > 0 ? $"{currentCombo} Combo!" : "";
-    }
+
 
 
     IEnumerator EndGame()
     {
         currentState = GameState.TimeUp;
-        if (currentCombo > GameData.MaxCombo) GameData.MaxCombo = currentCombo;
 
         timeUpUI.SetActive(true);
         yield return new WaitForSeconds(2f);
