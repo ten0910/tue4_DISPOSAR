@@ -16,7 +16,6 @@ public class ResultManager : MonoBehaviour
     public Text totalText;
     public Text correctText;
     public Text wrongText;
-    public Text maxComboText;
     public Text rankText;
 
     [Header("Rank Settings (S, A, B, Cの順で4つ要素を作る)")]
@@ -28,7 +27,6 @@ public class ResultManager : MonoBehaviour
         totalText.text = GameData.TotalThrown.ToString();
         correctText.text = GameData.CorrectCount.ToString();
         wrongText.text = GameData.WrongCount.ToString();
-        maxComboText.text = GameData.MaxCombo.ToString();
 
         EvaluateRank();
     }
