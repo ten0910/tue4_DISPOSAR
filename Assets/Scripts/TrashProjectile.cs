@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.InputSystem;
 
 public class TrashProjectile : MonoBehaviour
 {
@@ -23,9 +24,9 @@ public class TrashProjectile : MonoBehaviour
         if (isFlying || gameManager == null || gameManager.currentState != GameManager.GameState.Playing) return;
 
         // --- プロトタイプ用：キーボード操作でごみ箱を指定 ---
-        if (Input.GetKeyDown(KeyCode.Q)) TryFlyToBin(0); // 可燃
-        if (Input.GetKeyDown(KeyCode.W)) TryFlyToBin(1); // プラ
-        if (Input.GetKeyDown(KeyCode.E)) TryFlyToBin(2); // 缶・ペットボトル
+        if (Keyboard.current.qKey.wasPressedThisFrame) TryFlyToBin(0); // 普通ごみ
+        if (Keyboard.current.wKey.wasPressedThisFrame) TryFlyToBin(1); // プラ
+        if (Keyboard.current.eKey.wasPressedThisFrame) TryFlyToBin(2); // 缶・ペットボトル
 
         /* Arduino/圧力センサーがある場合の処理 (将来用)
         int binIndex = ArduinoManager.Instance.GetPressureSensorIndex();
@@ -33,9 +34,9 @@ public class TrashProjectile : MonoBehaviour
         */
 
         // マウス操作（デバッグ用）
-        if (Input.GetMouseButtonDown(0))
+        if (Mouse.current.leftButton.wasPressedThisFrame)
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
                 TrashBin bin = hit.collider.GetComponent<TrashBin>();

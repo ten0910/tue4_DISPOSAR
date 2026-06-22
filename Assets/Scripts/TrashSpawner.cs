@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro; // TextMeshProを使用
+using UnityEngine.InputSystem;
 
 public class TrashSpawner : MonoBehaviour
 {
@@ -26,9 +27,9 @@ public class TrashSpawner : MonoBehaviour
 
         // RFID読み取りのプロトタイプ（キーボード操作）
         // 1: バナナの皮(101), 2: ペットボトル(102), 3: お菓子の袋(103)
-        if (Input.GetKeyDown(KeyCode.Alpha1)) OnRFIDRead("101");
-        if (Input.GetKeyDown(KeyCode.Alpha2)) OnRFIDRead("102");
-        if (Input.GetKeyDown(KeyCode.Alpha3)) OnRFIDRead("103");
+        if (Keyboard.current.digit1Key.wasPressedThisFrame) OnRFIDRead("101");
+        if (Keyboard.current.digit2Key.wasPressedThisFrame) OnRFIDRead("102");
+        if (Keyboard.current.digit3Key.wasPressedThisFrame) OnRFIDRead("103");
 
         /* Arduino/RFIDセンサーがある場合の処理 (コメントアウト)
         string rfidId = ArduinoManager.Instance.ReadRFID(); 

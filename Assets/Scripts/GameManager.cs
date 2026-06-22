@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using TMPro; // TextMeshProを使用
 
@@ -38,7 +39,7 @@ public class GameManager : MonoBehaviour
         switch (currentState)
         {
             case GameState.Tutorial:
-                if (Input.GetKeyDown(KeyCode.Return)) // Enterキー
+                if (Keyboard.current.enterKey.wasPressedThisFrame) // Enterキー
                 {
                     tutorialUI.SetActive(false);
                     StartCoroutine(StartCountdown());
