@@ -67,6 +67,7 @@ public class TrashProjectile : MonoBehaviour
 
         // 判定（DatabaseのtargetBinTypeと、入れた箱のタイプを比較）
         bool isCorrect = (data.targetBinType == bin.targetBinType);
+        Debug.Log(isCorrect);
         
         if (gameManager != null)
         {
@@ -84,9 +85,6 @@ public class TrashProjectile : MonoBehaviour
             transform.position = currentPos;
             yield return null;
         }
-
-        // 到着時の演出
-        bin.PlayEffect(isCorrect);
 
         // 解説を表示（Spawner側のUI制御を呼ぶ）
         if (trashSpawner != null)

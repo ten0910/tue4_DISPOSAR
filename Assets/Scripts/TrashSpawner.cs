@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro; // TextMeshProを使用
 using UnityEngine.InputSystem;
+using System.Collections; // コルーチンを使用するために追加
 
 public class TrashSpawner : MonoBehaviour
 {
@@ -11,14 +12,25 @@ public class TrashSpawner : MonoBehaviour
     public GameObject explanationUI;      // 解説UIの親
     public TextMeshProUGUI explanationText; // 解説文表示用
 
+    [Header("ゴミ箱の演出・UI設定")]
+    public ParticleSystem correctEffect;
+    public ParticleSystem wrongEffect;
+    public GameObject correctUI;
+    public GameObject wrongUI;
+
     private GameObject currentTrashObject;
     private GameManager gameManager;
+    private Coroutine uiHideCoroutine; // 実行中のコルーチンを管理する変数
 
     void Start()
     {
         gameManager = Object.FindFirstObjectByType<GameManager>();
         if (explanationUI) explanationUI.SetActive(false);
         if (trashNameText) trashNameText.text = "";
+
+        // 初期状態では演出用UIを非表示にしておく
+        if (correctUI) correctUI.SetActive(false);
+        if (wrongUI) wrongUI.SetActive(false);
     }
 
     void Update()
@@ -30,11 +42,6 @@ public class TrashSpawner : MonoBehaviour
         if (Keyboard.current.digit1Key.wasPressedThisFrame) OnRFIDRead("101");
         if (Keyboard.current.digit2Key.wasPressedThisFrame) OnRFIDRead("102");
         if (Keyboard.current.digit3Key.wasPressedThisFrame) OnRFIDRead("103");
-
-        /* Arduino/RFIDセンサーがある場合の処理 (コメントアウト)
-        string rfidId = ArduinoManager.Instance.ReadRFID(); 
-        if (!string.IsNullOrEmpty(rfidId)) OnRFIDRead(rfidId);
-        */
     }
 
     public void OnRFIDRead(string id)
@@ -48,6 +55,14 @@ public class TrashSpawner : MonoBehaviour
         // 次の読み取り時にエフェクトや解説を非表示にする
         if (explanationUI) explanationUI.SetActive(false);
 
+        // 新しく読み込んだ際、前回のUIタイマーが動いていたら強制停止して非表示にする
+        if (uiHideCoroutine != null)
+        {
+            StopCoroutine(uiHideCoroutine);
+            if (correctUI) correctUI.SetActive(false);
+            if (wrongUI) wrongUI.SetActive(false);
+        }
+
         TrashData data = database.GetById(id);
         if (string.IsNullOrEmpty(data.id))
         {
@@ -55,7 +70,6 @@ public class TrashSpawner : MonoBehaviour
             return;
         }
 
-        // すでに持っている場合は生成しない（または古いものを消す）
         if (currentTrashObject != null) Destroy(currentTrashObject);
 
         GameData.CurrentTrash = data;
@@ -79,7 +93,6 @@ public class TrashSpawner : MonoBehaviour
         TrashProjectile projectile = currentTrashObject.GetComponent<TrashProjectile>();
         if (projectile != null)
         {
-            // intではなくDataそのものを渡すように修正
             projectile.data = data;
         }
     }
@@ -90,12 +103,41 @@ public class TrashSpawner : MonoBehaviour
         {
             explanationUI.SetActive(true);
             string result = isCorrect ? "<color=blue>正解！</color>\n" : "<color=red>不正解...</color>\n";
+
+            // --- ここから追加・統合した処理 ---
+            if (isCorrect)
+            {
+                if (correctEffect) correctEffect.Play();
+                if (correctUI) correctUI.SetActive(true);
+            }
+            else
+            {
+                if (wrongEffect) wrongEffect.Play();
+                if (wrongUI) wrongUI.SetActive(true);
+            }
+
+            // すでにタイマーが動いていた場合は一度止める（連続で呼ばれた際のバグ防止）
+            if (uiHideCoroutine != null) StopCoroutine(uiHideCoroutine);
+            // 1秒後にUIを消すコルーチンを開始
+            uiHideCoroutine = StartCoroutine(HideUIDelayed(1.0f));
+            // --- ここまで ---
+
             explanationText.text = result + GameData.CurrentTrash.description;
         }
-        
-        // 投げ終わったので所持表示をクリア
+
         if (trashNameText) trashNameText.text = "";
         GameData.IsHoldingTrash = false;
         currentTrashObject = null;
+    }
+
+    // UIを遅延して非表示にするコルーチン
+    private IEnumerator HideUIDelayed(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        if (correctUI) correctUI.SetActive(false);
+        if (wrongUI) wrongUI.SetActive(false);
+
+        uiHideCoroutine = null;
     }
 }
