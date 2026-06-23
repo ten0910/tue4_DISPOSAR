@@ -64,21 +64,20 @@ public class GameManager : MonoBehaviour
         if (countdownText != null) countdownText.gameObject.SetActive(true);
 
         // 10秒カウントダウン
-        for (int i = 10; i > 0; i--)
+        for (int i = 5; i > 0; i--)
         {
             if (countdownText != null) countdownText.text = i.ToString();
             yield return new WaitForSeconds(1f);
         }
 
-        if (countdownText != null) countdownText.text = "START!";
+        if (countdownText != null) countdownText.text = timeRemaining.ToString();
         
         // スタート時のポップ演出 (0.6秒)
         if (startPopSprite) startPopSprite.SetActive(true);
         yield return new WaitForSeconds(0.6f);
         if (startPopSprite) startPopSprite.SetActive(false);
 
-        yield return new WaitForSeconds(0.4f); // 合計1秒程度待機
-        if (countdownText != null) countdownText.gameObject.SetActive(false);
+        yield return new WaitForSeconds(0.4f); 
 
         timeRemaining = gameDuration;
         currentState = GameState.Playing;
