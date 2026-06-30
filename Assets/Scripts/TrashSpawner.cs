@@ -90,6 +90,13 @@ public class TrashSpawner : MonoBehaviour
 
         currentTrashObject = Instantiate(trashPrefab, spawnPoint.position, Quaternion.identity);
 
+        Rigidbody rb = currentTrashObject.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+
         TrashProjectile projectile = currentTrashObject.GetComponent<TrashProjectile>();
         if (projectile != null)
         {
