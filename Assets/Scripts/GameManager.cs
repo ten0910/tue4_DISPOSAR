@@ -90,6 +90,10 @@ public class GameManager : MonoBehaviour
         {
             GameData.CorrectCount++;
         }
+        else
+        {
+            GameData.WrongCount++;
+        }
     }
 
     void UpdateTimerUI()
@@ -106,11 +110,12 @@ public class GameManager : MonoBehaviour
     IEnumerator EndGame()
     {
         currentState = GameState.TimeUp;
+        GameData.ElapsedTime = Mathf.Max(0f, gameDuration - timeRemaining);
 
         timeUpUI.SetActive(true);
         yield return new WaitForSeconds(2f);
         timeUpUI.SetActive(false);
 
-        FadeManager.Instance.TransitionToScene("ResultScene", 1.0f, Color.black);
+        FadeManager.Instance.TransitionToScene("ResultScene_Temp", 1.0f, Color.black);
     }
 }

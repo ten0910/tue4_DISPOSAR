@@ -1,52 +1,71 @@
+using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class ResultManager : MonoBehaviour
 {
-    [System.Serializable]
-    public struct RankCondition
+    private const string TitleSceneName = "TitleScene";
+
+    [Header("Result UI")]
+    [SerializeField] private TextMeshProUGUI correctCountValueText;
+    [SerializeField] private TextMeshProUGUI totalCountValueText;
+    [SerializeField] private GameObject perfectResultGroup;
+    [SerializeField] private TextMeshProUGUI elapsedTimeValueText;
+    [SerializeField] private Button returnButton;
+
+    private void Start()
     {
-        public string rankName; // "S", "A", "B", "C"
-        public int minTotal;
-        public int minCorrect;
-        public int maxWrong;
-    }
+        ShowResult();
 
-    [Header("UI Elements")]
-    public Text totalText;
-    public Text correctText;
-    public Text wrongText;
-    public Text rankText;
-
-    [Header("Rank Settings (S, A, B, Cの順で4つ要素を作る)")]
-    public RankCondition[] rankConditions;
-
-    void Start()
-    {
-        // スコア表示
-        totalText.text = GameData.TotalThrown.ToString();
-        correctText.text = GameData.CorrectCount.ToString();
-        wrongText.text = GameData.WrongCount.ToString();
-
-        EvaluateRank();
-    }
-
-    void EvaluateRank()
-    {
-        string finalRank = "C"; // 条件を満たさなかった場合のデフォルト
-
-        // インスペクタで設定した条件を上から順にチェック
-        foreach (var condition in rankConditions)
+        if (returnButton != null)
         {
-            if (GameData.TotalThrown >= condition.minTotal &&
-                GameData.CorrectCount >= condition.minCorrect &&
-                GameData.WrongCount <= condition.maxWrong)
-            {
-                finalRank = condition.rankName;
-                break; // 満たした時点で決定（Sから順に設定しておくこと）
-            }
+            returnButton.onClick.AddListener(ReturnToTitle);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (returnButton != null)
+        {
+            returnButton.onClick.RemoveListener(ReturnToTitle);
+        }
+    }
+
+    private void ShowResult()
+    {
+        if (correctCountValueText != null)
+        {
+            correctCountValueText.text = $"{GameData.CorrectCount}個";
         }
 
-        rankText.text = finalRank;
+        if (totalCountValueText != null)
+        {
+            totalCountValueText.text = $"{GameData.TotalThrown}個";
+        }
+
+        bool isPerfect = GameData.TotalThrown > 0 &&
+                         GameData.CorrectCount == GameData.TotalThrown;
+
+        if (perfectResultGroup != null)
+        {
+            perfectResultGroup.SetActive(isPerfect);
+        }
+
+        if (isPerfect && elapsedTimeValueText != null)
+        {
+            elapsedTimeValueText.text = FormatTime(GameData.ElapsedTime);
+        }
+    }
+
+    public void ReturnToTitle()
+    {
+        FadeManager.Instance.TransitionToScene(TitleSceneName, 1f, Color.black);
+    }
+
+    private static string FormatTime(float seconds)
+    {
+        int totalSeconds = Mathf.Max(0, Mathf.RoundToInt(seconds));
+        return $"{totalSeconds / 60:00}:{totalSeconds % 60:00}";
     }
 }
