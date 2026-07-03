@@ -2,7 +2,11 @@ fileFormatVersion: 2
 guid: a2512bbe6cf5c5242b56518a78a8684d
 NativeFormatImporter:
   externalObjects: {}
+<<<<<<<< Updated upstream:Assets/Materials/floor.mat.meta
   mainObjectFileID: 2100000
+========
+  mainObjectFileID: 0
+>>>>>>>> Stashed changes:Assets/TextMesh Pro/IoEI SDF.asset.meta
   userData: 
   assetBundleName: 
   assetBundleVariant: 

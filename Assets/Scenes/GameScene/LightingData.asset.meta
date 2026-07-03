@@ -2,7 +2,11 @@ fileFormatVersion: 2
 guid: 7f0cc477a20abf941916a9d2b2ac6dff
 NativeFormatImporter:
   externalObjects: {}
+<<<<<<<< Updated upstream:Assets/Scenes/GameScene/LightingData.asset.meta
   mainObjectFileID: 112000000
+========
+  mainObjectFileID: 0
+>>>>>>>> Stashed changes:Assets/TextMesh Pro/MochiyPopOne-OTF-ExtraBold SDF.asset.meta
   userData: 
   assetBundleName: 
   assetBundleVariant: 

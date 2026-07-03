@@ -2,7 +2,11 @@ fileFormatVersion: 2
 guid: e49486aa09195414f899e875ca30596b
 NativeFormatImporter:
   externalObjects: {}
+<<<<<<<< Updated upstream:Assets/Scenes/TitleScene/LightingData 1.asset.meta
   mainObjectFileID: 112000000
+========
+  mainObjectFileID: 0
+>>>>>>>> Stashed changes:Assets/TextMesh Pro/Sniglet Regular SDF.asset.meta
   userData: 
   assetBundleName: 
   assetBundleVariant: 
